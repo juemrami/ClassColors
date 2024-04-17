@@ -666,38 +666,40 @@ if LootHistoryFrame then
 		UIDropDownMenu_AddButton(info)
 	end
 else
-	-- print(_, ": LootHistoryFrame not found")
+	-- retail moved to GroupLootHistoryFrame and a new system of tracking loot rolls
+	-- support required.
 end
-
 ------------------------------------------------------------------------
 -- FrameXML/PaperDollFrame.lua
 -- 7.3.0.25021
 -- 418
-if PaperDollFrame_SetLevel then 
-	hooksecurefunc("PaperDollFrame_SetLevel", function() -- 418
-		local className, class = UnitClass("player")
-		local color = CUSTOM_CLASS_COLORS[class].colorStr
+hooksecurefunc("PaperDollFrame_SetLevel", function() -- 418
+	local className, class = UnitClass("player")
+	local color = CUSTOM_CLASS_COLORS[class].colorStr
 
-		local primaryTalentTree, specName = GetSpecialization()
-		if primaryTalentTree then
-			primaryTalentTree, specName = GetSpecializationInfo(primaryTalentTree)
-		end
+	-- classic ui doesnt add the spec name or color in the format string
+	-- (though it is available to deduce)
+	-- see https://wago.tools/db2/GlobalStrings?build=1.15.2.54262&filter[BaseTag]=PLAYER_LEVEL
+	if not strfind(PLAYER_LEVEL, "\124c") then return end
+	
+	local primaryTalentTree, specName = GetSpecialization()
+	if primaryTalentTree then
+		primaryTalentTree, specName = GetSpecializationInfo(primaryTalentTree)
+	end
 
-		local level = UnitLevel("player")
-		local effectiveLevel = UnitEffectiveLevel("player")
-		if effectiveLevel ~= level then
-			level = EFFECTIVE_LEVEL_FORMAT:format(effectiveLevel, level)
-		end
+	local level = UnitLevel("player")
+	local effectiveLevel = UnitEffectiveLevel("player")
+	if effectiveLevel ~= level then
+		level = EFFECTIVE_LEVEL_FORMAT:format(effectiveLevel, level)
+	end
 
-		if specName and specName ~= "" then
-			CharacterLevelText:SetFormattedText(PLAYER_LEVEL, level, color, specName, className)
-		else
-			CharacterLevelText:SetFormattedText(PLAYER_LEVEL_NO_SPEC, level, color, className)
-		end
-	end)
-else
-	-- print(_, ": PaperDollFrame_SetLevel not found")
-end
+	if specName and specName ~= "" then
+		CharacterLevelText:SetFormattedText(PLAYER_LEVEL, level, color, specName, className)
+	else
+		CharacterLevelText:SetFormattedText(PLAYER_LEVEL_NO_SPEC, level, color, className)
+	end
+end)
+
 ------------------------------------------------------------------------
 -- FrameXML/RaidFinder.lua
 -- 7.3.0.25021
@@ -754,23 +756,19 @@ end
 -- 1600
 -- 7.2.0.23911
 -- 1600
-if StaticPopup_OnUpdate then
-	hooksecurefunc("StaticPopup_OnUpdate", function(self, elapsed)
-		if self.which ~= "GROUP_INVITE_CONFIRMATION" or self.timeLeft <= 0 then return end
+hooksecurefunc("StaticPopup_OnUpdate", function(self, elapsed)
+	if self.which ~= "GROUP_INVITE_CONFIRMATION" or self.timeLeft <= 0 then return end
 
-		if not self.linkRegion or not self.nextUpdateTime then return end
-		if self.nextUpdateTime > GetTime() then return end
+	if not self.linkRegion or not self.nextUpdateTime then return end
+	if self.nextUpdateTime > GetTime() then return end
 
-		local _, _, guid = GetInviteConfirmationInfo(self.data)
-		local _, class, _, _, _, name = GetPlayerInfoByGUID(guid)
-		local color = class and CUSTOM_CLASS_COLORS[class]
-		if color then
-			GameTooltipTextLeft1:SetFormattedText("|c%s%s|r", color.colorStr, name)
-		end
-	end)
-else
-	-- print(_, ": StaticPopup_OnUpdate not found")
-end
+	local _, _, guid = GetInviteConfirmationInfo(self.data)
+	local _, class, _, _, _, name = GetPlayerInfoByGUID(guid)
+	local color = class and CUSTOM_CLASS_COLORS[class]
+	if color then
+		GameTooltipTextLeft1:SetFormattedText("|c%s%s|r", color.colorStr, name)
+	end
+end)
 ------------------------------------------------------------------------
 
 local numAddons = 0
