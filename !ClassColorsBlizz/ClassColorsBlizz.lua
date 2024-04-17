@@ -562,154 +562,173 @@ end)
 -- FrameXML/LFRFrame.lua
 -- 7.3.0.25021
 -- 505
-
-hooksecurefunc("LFRBrowseFrameListButton_SetData", function(button, index)
-	local _, _, _, _, _, _, _, class = SearchLFGGetResults(index)
-	local color = class and CUSTOM_CLASS_COLORS[class]
-	if color then
-		button.class:SetTextColor(color.r, color.g, color.b)
-	end
-end)
+if LFRBrowseFrameListButton_SetData then
+	hooksecurefunc("LFRBrowseFrameListButton_SetData", function(button, index)
+		local _, _, _, _, _, _, _, class = SearchLFGGetResults(index)
+		local color = class and CUSTOM_CLASS_COLORS[class]
+		if color then
+			button.class:SetTextColor(color.r, color.g, color.b)
+		end
+	end)
+else
+	-- print(_, ": LFRBrowseFrameListButton_SetData not found")
+end
 
 ------------------------------------------------------------------------
 -- FrameXML/LevelUpDisplay.lua
 -- 7.3.0.25021
 -- 1359
+if BossBanner_ConfigureLootFrame then
+	hooksecurefunc("BossBanner_ConfigureLootFrame", function(lootFrame, data)
+			local color = CUSTOM_CLASS_COLORS[data.className]
+			lootFrame.PlayerName:SetTextColor(color.r, color.g, color.b)
+	end)
+else
+	-- print(_, ": BossBanner_ConfigureLootFrame not found")
+end
 
-hooksecurefunc("BossBanner_ConfigureLootFrame", function(lootFrame, data)
-		local color = CUSTOM_CLASS_COLORS[data.className]
-		lootFrame.PlayerName:SetTextColor(color.r, color.g, color.b)
-end)
 
 ------------------------------------------------------------------------
 -- FrameXML/LootFrame.lua
 -- 7.3.0.25021
 -- 918
 
-hooksecurefunc("MasterLooterFrame_UpdatePlayers", function()
-	-- TODO: Find a better way of doing this... Blizzard's way is frankly quite awful,
-	--       creating multiple new local tables every time the function runs. :(
-	for k, playerFrame in pairs(MasterLooterFrame) do
-		if type(k) == "string" and strmatch(k, "^player%d+$") and type(playerFrame) == "table" and playerFrame.id and playerFrame.Name then
-			local i = playerFrame.id
-			local _, class
-			if IsInRaid() then
-				_, class = UnitClass("raid"..i)
-			elseif i > 1 then
-				_, class = UnitClass("party"..i)
-			else
-				_, class = UnitClass("player")
-			end
+if MasterLooterFrame_UpdatePlayers then
+	hooksecurefunc("MasterLooterFrame_UpdatePlayers", function()
+		-- TODO: Find a better way of doing this... Blizzard's way is frankly quite awful,
+		--       creating multiple new local tables every time the function runs. :(
+		for k, playerFrame in pairs(MasterLooterFrame) do
+			if type(k) == "string" and strmatch(k, "^player%d+$") and type(playerFrame) == "table" and playerFrame.id and playerFrame.Name then
+				local i = playerFrame.id
+				local _, class
+				if IsInRaid() then
+					_, class = UnitClass("raid"..i)
+				elseif i > 1 then
+					_, class = UnitClass("party"..i)
+				else
+					_, class = UnitClass("player")
+				end
 
-			local color = class and CUSTOM_CLASS_COLORS[class]
-			if color then
-				playerFrame.Name:SetTextColor(color.r, color.g, color.b)
+				local color = class and CUSTOM_CLASS_COLORS[class]
+				if color then
+					playerFrame.Name:SetTextColor(color.r, color.g, color.b)
+				end
 			end
 		end
-	end
-end)
+	end)
+else
+	-- print(_, ": MasterLooterFrame_UpdatePlayers not found")
+end
 
 ------------------------------------------------------------------------
 -- FrameXML/LootHistory.lua
 -- 7.3.0.25021
 -- 242, 286, 419
-
-hooksecurefunc("LootHistoryFrame_UpdateItemFrame", function(self, itemFrame) -- 242
-	local itemID = itemFrame.itemIdx
-	local rollID, _, _, done, winnerID = C_LootHistory.GetItem(itemID)
-	local expanded = self.expandedRolls[rollID]
-	if done and winnerID and not expanded then
-		local _, class = C_LootHistory.GetPlayerInfo(itemID, winnerID)
-		local color = class and CUSTOM_CLASS_COLORS[class]
-		if color then
-			itemFrame.WinnerName:SetVertexColor(color.r, color.g, color.b)
+if LootHistoryFrame then
+	hooksecurefunc("LootHistoryFrame_UpdateItemFrame", function(self, itemFrame) -- 242
+		local itemID = itemFrame.itemIdx
+		local rollID, _, _, done, winnerID = C_LootHistory.GetItem(itemID)
+		local expanded = self.expandedRolls[rollID]
+		if done and winnerID and not expanded then
+			local _, class = C_LootHistory.GetPlayerInfo(itemID, winnerID)
+			local color = class and CUSTOM_CLASS_COLORS[class]
+			if color then
+				itemFrame.WinnerName:SetVertexColor(color.r, color.g, color.b)
+			end
 		end
-	end
-end)
+	end)
 
-hooksecurefunc("LootHistoryFrame_UpdatePlayerFrame", function(self, playerFrame) -- 286
-	if playerFrame.playerIdx then
-		local name, class = C_LootHistory.GetPlayerInfo(playerFrame.itemIdx, playerFrame.playerIdx)
-		local color = name and class and CUSTOM_CLASS_COLORS[class]
-		if color then
-			playerFrame.PlayerName:SetVertexColor(color.r, color.g, color.b)
+	hooksecurefunc("LootHistoryFrame_UpdatePlayerFrame", function(self, playerFrame) -- 286
+		if playerFrame.playerIdx then
+			local name, class = C_LootHistory.GetPlayerInfo(playerFrame.itemIdx, playerFrame.playerIdx)
+			local color = name and class and CUSTOM_CLASS_COLORS[class]
+			if color then
+				playerFrame.PlayerName:SetVertexColor(color.r, color.g, color.b)
+			end
 		end
+	end)
+
+	function LootHistoryDropDown_Initialize(self) -- 419
+		local info = UIDropDownMenu_CreateInfo()
+		info.text = MASTER_LOOTER
+		info.fontObject = GameFontNormalLeft
+		info.isTitle = 1
+		info.notCheckable = 1
+		UIDropDownMenu_AddButton(info)
+
+		local name, class = C_LootHistory.GetPlayerInfo(self.itemIdx, self.playerIdx)
+		local color = CUSTOM_CLASS_COLORS[class]
+
+		info = UIDropDownMenu_CreateInfo()
+		info.text = format(MASTER_LOOTER_GIVE_TO, format("|c%s%s|r", color.colorStr, name))
+		info.func = LootHistoryDropDown_OnClick
+		info.notCheckable = 1
+		UIDropDownMenu_AddButton(info)
 	end
-end)
-
-function LootHistoryDropDown_Initialize(self) -- 419
-	local info = UIDropDownMenu_CreateInfo()
-	info.text = MASTER_LOOTER
-	info.fontObject = GameFontNormalLeft
-	info.isTitle = 1
-	info.notCheckable = 1
-	UIDropDownMenu_AddButton(info)
-
-	local name, class = C_LootHistory.GetPlayerInfo(self.itemIdx, self.playerIdx)
-	local color = CUSTOM_CLASS_COLORS[class]
-
-	info = UIDropDownMenu_CreateInfo()
-	info.text = format(MASTER_LOOTER_GIVE_TO, format("|c%s%s|r", color.colorStr, name))
-	info.func = LootHistoryDropDown_OnClick
-	info.notCheckable = 1
-	UIDropDownMenu_AddButton(info)
+else
+	-- print(_, ": LootHistoryFrame not found")
 end
 
 ------------------------------------------------------------------------
 -- FrameXML/PaperDollFrame.lua
 -- 7.3.0.25021
 -- 418
+if PaperDollFrame_SetLevel then 
+	hooksecurefunc("PaperDollFrame_SetLevel", function() -- 418
+		local className, class = UnitClass("player")
+		local color = CUSTOM_CLASS_COLORS[class].colorStr
 
-hooksecurefunc("PaperDollFrame_SetLevel", function() -- 418
-	local className, class = UnitClass("player")
-	local color = CUSTOM_CLASS_COLORS[class].colorStr
+		local primaryTalentTree, specName = GetSpecialization()
+		if primaryTalentTree then
+			primaryTalentTree, specName = GetSpecializationInfo(primaryTalentTree)
+		end
 
-	local primaryTalentTree, specName = GetSpecialization()
-	if primaryTalentTree then
-		primaryTalentTree, specName = GetSpecializationInfo(primaryTalentTree)
-	end
+		local level = UnitLevel("player")
+		local effectiveLevel = UnitEffectiveLevel("player")
+		if effectiveLevel ~= level then
+			level = EFFECTIVE_LEVEL_FORMAT:format(effectiveLevel, level)
+		end
 
-	local level = UnitLevel("player")
-	local effectiveLevel = UnitEffectiveLevel("player")
-	if effectiveLevel ~= level then
-		level = EFFECTIVE_LEVEL_FORMAT:format(effectiveLevel, level)
-	end
-
-	if specName and specName ~= "" then
-		CharacterLevelText:SetFormattedText(PLAYER_LEVEL, level, color, specName, className)
-	else
-		CharacterLevelText:SetFormattedText(PLAYER_LEVEL_NO_SPEC, level, color, className)
-	end
-end)
-
+		if specName and specName ~= "" then
+			CharacterLevelText:SetFormattedText(PLAYER_LEVEL, level, color, specName, className)
+		else
+			CharacterLevelText:SetFormattedText(PLAYER_LEVEL_NO_SPEC, level, color, className)
+		end
+	end)
+else
+	-- print(_, ": PaperDollFrame_SetLevel not found")
+end
 ------------------------------------------------------------------------
 -- FrameXML/RaidFinder.lua
 -- 7.3.0.25021
 -- 488
+if RaidFinderQueueFrameCooldownFrame_Update then
+	hooksecurefunc("RaidFinderQueueFrameCooldownFrame_Update", function() -- 488
+		local prefix, members
+		if IsInRaid() then
+			prefix, members = "raid", GetNumGroupMembers()
+		else
+			prefix, members = "party", GetNumSubgroupMembers()
+		end
 
-hooksecurefunc("RaidFinderQueueFrameCooldownFrame_Update", function() -- 488
-	local prefix, members
-	if IsInRaid() then
-		prefix, members = "raid", GetNumGroupMembers()
-	else
-		prefix, members = "party", GetNumSubgroupMembers()
-	end
-
-	local cooldowns = 0
-	for i = 1, members do
-		local unit = prefix .. i
-		if UnitHasLFGDeserter(unit) and not UnitIsUnit(unit, "player") then
-			cooldowns = cooldowns + 1
-			if cooldowns <= MAX_RAID_FINDER_COOLDOWN_NAMES then
-				local _, class = UnitClass(unit)
-				local color = class and CUSTOM_CLASS_COLORS[class]
-				if color then
-					_G["RaidFinderQueueFrameCooldownFrameName" .. cooldowns]:SetFormattedText("|c%s%s|r", color.colorStr, UnitName(unit))
+		local cooldowns = 0
+		for i = 1, members do
+			local unit = prefix .. i
+			if UnitHasLFGDeserter(unit) and not UnitIsUnit(unit, "player") then
+				cooldowns = cooldowns + 1
+				if cooldowns <= MAX_RAID_FINDER_COOLDOWN_NAMES then
+					local _, class = UnitClass(unit)
+					local color = class and CUSTOM_CLASS_COLORS[class]
+					if color then
+						_G["RaidFinderQueueFrameCooldownFrameName" .. cooldowns]:SetFormattedText("|c%s%s|r", color.colorStr, UnitName(unit))
+					end
 				end
 			end
 		end
-	end
-end)
+	end)
+else
+	-- print(_, ": RaidFinderQueueFrameCooldownFrame_Update not found")
+end
 
 ------------------------------------------------------------------------
 -- FrameXML/RaidWarning.lua
@@ -735,21 +754,23 @@ end
 -- 1600
 -- 7.2.0.23911
 -- 1600
+if StaticPopup_OnUpdate then
+	hooksecurefunc("StaticPopup_OnUpdate", function(self, elapsed)
+		if self.which ~= "GROUP_INVITE_CONFIRMATION" or self.timeLeft <= 0 then return end
 
-hooksecurefunc("StaticPopup_OnUpdate", function(self, elapsed)
-	if self.which ~= "GROUP_INVITE_CONFIRMATION" or self.timeLeft <= 0 then return end
+		if not self.linkRegion or not self.nextUpdateTime then return end
+		if self.nextUpdateTime > GetTime() then return end
 
-	if not self.linkRegion or not self.nextUpdateTime then return end
-	if self.nextUpdateTime > GetTime() then return end
-
-	local _, _, guid = GetInviteConfirmationInfo(self.data)
-	local _, class, _, _, _, name = GetPlayerInfoByGUID(guid)
-	local color = class and CUSTOM_CLASS_COLORS[class]
-	if color then
-		GameTooltipTextLeft1:SetFormattedText("|c%s%s|r", color.colorStr, name)
-	end
-end)
-
+		local _, _, guid = GetInviteConfirmationInfo(self.data)
+		local _, class, _, _, _, name = GetPlayerInfoByGUID(guid)
+		local color = class and CUSTOM_CLASS_COLORS[class]
+		if color then
+			GameTooltipTextLeft1:SetFormattedText("|c%s%s|r", color.colorStr, name)
+		end
+	end)
+else
+	-- print(_, ": StaticPopup_OnUpdate not found")
+end
 ------------------------------------------------------------------------
 
 local numAddons = 0
