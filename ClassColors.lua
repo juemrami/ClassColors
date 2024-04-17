@@ -63,9 +63,19 @@ end
 
 ------------------------------------------------------------------------
 
+local validClasses = { }
+for i = 1, GetNumClasses() do
+	local info = C_CreatureInfo.GetClassInfo(i)
+	if info and info.classFile then -- returs nil for classes not in game version
+		validClasses[info.classFile] = true
+	end
+end
+
 local classes = {}
 for class in pairs(RAID_CLASS_COLORS) do
-	tinsert(classes, class)
+	if validClasses[class] then
+		tinsert(classes, class)
+	end
 end
 sort(classes)
 
