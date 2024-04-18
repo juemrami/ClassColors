@@ -834,7 +834,7 @@ end)
 local numAddons = 0
 
 for addon, func in pairs(addonFuncs) do
-	if IsAddOnLoaded(addon) then
+	if C_AddOns.IsAddOnLoaded(addon) then
 		addonFuncs[addon] = nil
 		func()
 	else
