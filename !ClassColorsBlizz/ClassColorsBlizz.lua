@@ -295,8 +295,13 @@ addonFuncs["Blizzard_RaidUI"] = function()
 			local color = online and not dead and _G["RaidGroup"..subgroup].nextIndex <= MEMBERS_PER_RAID_GROUP and class and CUSTOM_CLASS_COLORS[class]
 			if color then
 				local button = _G["RaidGroupButton"..i]
+				-- in classic, class is a button not a fontstring
+				if button.subframes.class:GetObjectType() == "Button" then
+					button.subframes.class.text:SetTextColor(color.r, color.g, color.b)
+				else
+					button.subframes.class:SetTextColor(color.r, color.g, color.b)
+				end	
 				button.subframes.name:SetTextColor(color.r, color.g, color.b)
-				button.subframes.class:SetTextColor(color.r, color.g, color.b)
 				button.subframes.level:SetTextColor(color.r, color.g, color.b)
 			end
 		end
@@ -787,8 +792,12 @@ do
 	RaidNotice_AddMessage = function(frame, message, ...) -- 130
 		if strfind(message, "|cff") then
 			for hex, class in pairs(blizzHexColors) do
+				-- nil check required since `blizzHexColors` stores entries for all classes
+				-- and `CUSTOM_CLASS_COLORS` only contains entries for those in the game version
 				local color = CUSTOM_CLASS_COLORS[class]
-				message = gsub(message, hex, color.colorStr)
+				if color then 
+					message = gsub(message, hex, color.colorStr)
+				end
 			end
 		end
 		return AddMessage(frame, message, ...)
