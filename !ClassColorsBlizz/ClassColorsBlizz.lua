@@ -197,6 +197,38 @@ addonFuncs["Blizzard_Commentator"] = function()
 end
 
 ------------------------------------------------------------------------
+-- Blizzard_Communities/CommunitiesMemberList.lua
+-- https://github.com/Gethe/wow-ui-source/blame/87c526a3ae979a7f5244d635bd8ae952b4313bd8/Interface/AddOns/Blizzard_Communities/CommunitiesMemberList.lua#L937C3-L937C3
+
+addonFuncs["Blizzard_Communities"] = function()
+	local function ScrollElement_ColorPlayerName(frame)
+		if not frame.GetMemberInfo then return end
+		local memberInfo = frame:GetMemberInfo()
+		if memberInfo then
+			if memberInfo.classID 
+			and memberInfo.presence ~= Enum.ClubMemberPresence.Offline
+			then
+				local classInfo = C_CreatureInfo.GetClassInfo(memberInfo.classID)
+				local color = (classInfo and CUSTOM_CLASS_COLORS[classInfo.classFile])
+				if color then
+					frame.NameFrame.Name:SetTextColor(color.r, color.g, color.b)
+				end
+			end
+		end
+	end
+	hooksecurefunc(CommunitiesFrame.MemberList, "RefreshListDisplay", function(self)
+		local memberFrames = {}
+		if self.ListScrollFrame then -- classic
+			memberFrames =  self.ListScrollFrame.buttons
+		elseif self.ScrollBox then  -- retail
+			memberFrames = self.ScrollBox:GetFrames()
+		end
+		for _, frame in ipairs(memberFrames) do
+			ScrollElement_ColorPlayerName(frame)
+		end
+	end)
+end
+------------------------------------------------------------------------
 -- Blizzard_GuildUI/Blizzard_GuildRoster.lua
 -- 7.3.0.25021
 -- 120
