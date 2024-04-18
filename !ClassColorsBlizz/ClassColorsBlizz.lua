@@ -376,6 +376,17 @@ end
 -- 7.3.0.25021
 -- 2962, 3289
 
+local function shouldColorChatByClass(info)
+	-- 0: always, 1: never, 2: respect info.colorNameByClass
+	local override = GetCVar("chatClassColorOverride")
+	if override == '0' then 
+		return true
+	elseif override == "1" then
+		return false
+	else
+		return info and info.colorNameByClass
+	end
+end
 function GetColoredName(event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
 	if not arg2 then
 		return arg2
@@ -395,7 +406,9 @@ function GetColoredName(event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, a
 	end
 
 	local info = ChatTypeInfo[chatType]
-	if info and info.colorNameByClass and arg12 and arg12 ~= "" and arg12 ~= 0 then
+	if  (arg12 and arg12 ~= "" and arg12 ~= 0) 
+		and shouldColorChatByClass(info) 
+	then
 		local _, class = GetPlayerInfoByGUID(arg12)
 		local color = class and CUSTOM_CLASS_COLORS[class]
 		if color then
