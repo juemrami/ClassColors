@@ -437,8 +437,27 @@ do
 	end
 
 	local function SetColor(self, r, g, b)
+		-- this addons calls `SetColor` with every swatchFunc callback
+		-- `SetColor` updates the swatch texture color, and it also saves the color to the db **only if the ColorPickerFrame is closed**
+		-- clicking "Okay" button invokes the swatchFunc callback on both retail and classic
+
+		-- on classic the color picker is hidden before the swatchFunc is called
+		-- however;
+		-- on retail; the swatchFunc is called before the color picker is hidden
+		
+		-- so in retail the color is not being saved because the frame was still open when the swatchFunc was called
+
 		self.swatch:SetVertexColor(r, g, b)
-		if not ColorPickerFrame:IsShown() then
+		if ColorPickerFrame:GetObjectType() == "ColorSelect" then
+			-- clasic method; only SetValue color when "okay" is pressed and the color picker is closed
+			self.label:SetTextColor(r, g, b)
+			if not ColorPickerFrame:IsShown() then 
+				self:SetValue(r, g, b)
+			end
+		elseif ColorPickerFrame:GetObjectType() == "Frame" 
+			and ColorPickerFrame.Footer.OkayButton 
+		then
+			-- retail workaround; always SetValue and only revert on `cancelFunc` invocation
 			self:SetValue(r, g, b)
 		end
 	end
