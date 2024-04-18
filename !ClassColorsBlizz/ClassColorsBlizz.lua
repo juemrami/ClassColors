@@ -313,8 +313,14 @@ addonFuncs["Blizzard_RaidUI"] = function()
 		if color then
 			local r, g, b = color.r, color.g, color.b
 			_G["RaidGroupButton"..i.."Name"]:SetTextColor(r, g, b)
-			_G["RaidGroupButton"..i.."Class"]:SetTextColor(r, g, b)
 			_G["RaidGroupButton"..i.."Level"]:SetTextColor(r, g, b)
+			local buttonClass = _G["RaidGroupButton"..i.."Class"]
+			if buttonClass:GetObjectType() == "Button" then
+				-- classic support
+				buttonClass.text:SetTextColor(r, g, b)
+			else
+				buttonClass:SetTextColor(r, g, b)
+			end
 		end
 	end)
 
