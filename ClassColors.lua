@@ -8,12 +8,13 @@
 ----------------------------------------------------------------------]]
 
 local _, ns = ...
-if CUSTOM_CLASS_COLORS then
-	ns.alreadyLoaded = true
-	return
-end
+if ns.alreadyLoaded then return end
 
-CUSTOM_CLASS_COLORS = {}
+if CUSTOM_CLASS_COLORS then
+	print("`CUSTOM_CLASS_COLORS` is already defined by another other addon. Prioritizng any values set by that addon.")
+else
+	CUSTOM_CLASS_COLORS = {}
+end
 
 ------------------------------------------------------------------------
 
@@ -152,6 +153,15 @@ f:SetScript("OnEvent", function(self, event, addon)
 			b = b,
 			colorStr = hex,
 		}
+
+		-- support for inheriting colors set by other addons.
+		local inherited = CUSTOM_CLASS_COLORS[class]
+		if inherited then
+			r = inherited.r
+			g = inherited.g
+			b = inherited.b
+			hex = inherited.colorStr or format("ff%02x%02x%02x", r * 255, g * 255, b * 255)
+		end
 
 		if not db[class] or not db[class].r or not db[class].g or not db[class].b then
 			db[class] = {
@@ -506,3 +516,4 @@ do
 end
 
 ------------------------------------------------------------------------
+ns.alreadyLoaded = true
