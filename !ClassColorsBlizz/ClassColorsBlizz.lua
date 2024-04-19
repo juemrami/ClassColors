@@ -358,7 +358,10 @@ end
 -- 469, 470
 
 addonFuncs["Blizzard_TradeSkillUI"] = function()
+	-- not present in classic atm
+	if not TradeSkillFrame.DetailsFrame.GuildFrame then return end
 	-- TradeSkillGuildListingMixin:Refresh()
+	
 	hooksecurefunc(TradeSkillFrame.DetailsFrame.GuildFrame, "Refresh", function(self) -- 470, 471
 		if self.waitingOnData then return end
 
