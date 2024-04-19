@@ -63,20 +63,15 @@ local function DispatchCallbacks()
 end
 
 ------------------------------------------------------------------------
-
-local validClasses = { }
-for i = 1, GetNumClasses() do
-	local info = C_CreatureInfo.GetClassInfo(i)
-	if info and info.classFile then -- returs nil for classes not in game version
-		validClasses[info.classFile] = true
-	end
-end
-
 local classes = {}
-for class in pairs(RAID_CLASS_COLORS) do
-	if validClasses[class] then
-		tinsert(classes, class)
-	end
+-- for class, _ in pairs(RAID_CLASS_COLORS) do
+-- 	tinsert(classes, class)
+-- end
+
+-- CLASS_SORT_ORDER table contains only classes valid for current game client.
+-- use over `RAID_CLASS_COLORS` to avoid storing/showing data for unused classes in non retail clients.
+for _, class in ipairs(CLASS_SORT_ORDER) do
+	tinsert(classes, class)
 end
 sort(classes)
 
