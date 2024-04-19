@@ -483,20 +483,32 @@ do
 end
 
 ------------------------------------------------------------------------
--- FrameXML/FriendsFrame.lua
--- 7.3.0.25021
--- 743
+-- FrameXML/FriendsFrame_Shared.lua
+-- 4.4.0.54339 | 661
+-- SharedXML/FriendsFrame.lua
+-- 10.2.7.54295 | 817
 
-hooksecurefunc("WhoList_Update", function()
-	local offset = FauxScrollFrame_GetOffset(WhoListScrollFrame)
-	for i = 1, WHOS_TO_DISPLAY do
-		local _, _, _, _, _, _, class = GetWhoInfo(i + offset)
-		local color = class and CUSTOM_CLASS_COLORS[class]
+if WhoList_InitButton then -- retail method
+	hooksecurefunc("WhoList_InitButton", function(button, elementData) -- 817
+		local info = elementData.info
+		local color = info and info.filename and CUSTOM_CLASS_COLORS[info.filename]
 		if color then
-			_G["WhoFrameButton"..i.."Class"]:SetTextColor(color.r, color.g, color.b)
+			button.Class:SetTextColor(color.r, color.g, color.b)
 		end
-	end
-end)
+	end)
+else -- classic clients
+	hooksecurefunc("WhoList_Update", function() -- 661
+		local offset = FauxScrollFrame_GetOffset(WhoListScrollFrame)
+		for i = 1, WHOS_TO_DISPLAY do
+			local info = C_FriendList.GetWhoInfo(i + offset)
+			local color = class and CUSTOM_CLASS_COLORS[info.filename]
+			if color then
+				_G["WhoFrameButton"..i.."Class"]:SetTextColor(color.r, color.g, color.b)
+			end
+		end
+	end)
+end
+
 
 ------------------------------------------------------------------------
 -- FrameXML/LFDFrame.lua
