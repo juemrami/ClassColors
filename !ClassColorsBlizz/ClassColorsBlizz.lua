@@ -359,7 +359,9 @@ end
 
 addonFuncs["Blizzard_TradeSkillUI"] = function()
 	-- not present in classic atm
-	if not TradeSkillFrame.DetailsFrame.GuildFrame then return end
+	if not (TradeSkillFrame.DetailsFrame
+		and TradeSkillFrame.DetailsFrame.GuildFrame) 
+	then return end;
 	-- TradeSkillGuildListingMixin:Refresh()
 	
 	hooksecurefunc(TradeSkillFrame.DetailsFrame.GuildFrame, "Refresh", function(self) -- 470, 471
@@ -732,15 +734,23 @@ end
 hooksecurefunc("PaperDollFrame_SetLevel", function() -- 418
 	local className, class = UnitClass("player")
 	local color = CUSTOM_CLASS_COLORS[class].colorStr
-
-	-- classic ui doesnt add the spec name or color in the format string
+	local specName;
+	-- classic era doesnt add the spec name or color in the format string
 	-- (though it is available to deduce)
 	-- see https://wago.tools/db2/GlobalStrings?build=1.15.2.54262&filter[BaseTag]=PLAYER_LEVEL
 	if not strfind(PLAYER_LEVEL, "\124c") then return end
-	
-	local primaryTalentTree, specName = GetSpecialization()
-	if primaryTalentTree then
-		primaryTalentTree, specName = GetSpecializationInfo(primaryTalentTree)
+	if GetSpecialization and GetSpecializationInfo then
+		local specID = GetSpecialization()
+		if specID then
+			specID, specName = GetSpecializationInfo(specID)
+		end
+	elseif GetPrimaryTalentTree then
+		-- https://warcraft.wiki.gg/wiki/API_GetPrimaryTalentTree 
+		-- added in cata classic 
+		local specID = GetPrimaryTalentTree()
+		if specID then
+			specName = select(2, GetTalentTabInfo(specID))
+		end
 	end
 
 	local level = UnitLevel("player")
