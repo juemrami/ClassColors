@@ -9,9 +9,6 @@
 -- ref: https://www.townlong-yak.com/globe/wut/#q:RAID_CLASS_COLORS
 
 local _, ns = ...
-if ns.alreadyLoaded then
-	return
-end
 
 local strfind, format, gsub, strmatch, strsub = string.find, string.format, string.gsub, string.match, string.sub
 local pairs, type = pairs, type
@@ -858,3 +855,5 @@ if numAddons > 0 then
 		end
 	end)
 end
+
+ns.alreadyLoaded = true
