@@ -841,6 +841,35 @@ hooksecurefunc("StaticPopup_OnUpdate", function(self, elapsed)
 		GameTooltipTextLeft1:SetFormattedText("|c%s%s|r", color.colorStr, name)
 	end
 end)
+
+------------------------------------------------------------------------
+-- FrameXML/ChatConfigFrame.xml
+-- 4.4.0.54339
+-- 677, 701
+if ChatConfigChannelSettingsClassColorLegend
+	and ChatConfigChatSettingsClassColorLegend
+then -- only in Cata client
+	local ClassColorLegend_OnShow = function(self)
+		if not self.classStrings then return end;
+		for key, classString in ipairs(self.classStrings) do
+			---@cast classString FontString
+			local classFile = CLASS_SORT_ORDER[key]
+			local color = classFile and CUSTOM_CLASS_COLORS[classFile]
+			if color then
+				classString:SetFormattedText("\124c%s%s\124r", 
+					color.colorStr, LOCALIZED_CLASS_NAMES_MALE[classFile]
+				);
+			end
+		end
+	end
+
+	ChatConfigChannelSettingsClassColorLegend:HookScript("OnShow", 
+		ClassColorLegend_OnShow
+	);
+	ChatConfigChatSettingsClassColorLegend:HookScript("OnShow",
+		ClassColorLegend_OnShow
+	);
+end 
 ------------------------------------------------------------------------
 
 local numAddons = 0
