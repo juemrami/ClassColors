@@ -662,35 +662,36 @@ end
 
 ------------------------------------------------------------------------
 -- FrameXML/LootFrame.lua
--- 7.3.0.25021
--- 918
+-- 1.15.2 | 610
+-- FrameXML/GroupLootFrame.lua
+-- 10.2.6 | 696
 
-if MasterLooterFrame_UpdatePlayers then
-	hooksecurefunc("MasterLooterFrame_UpdatePlayers", function()
-		-- TODO: Find a better way of doing this... Blizzard's way is frankly quite awful,
-		--       creating multiple new local tables every time the function runs. :(
-		for k, playerFrame in pairs(MasterLooterFrame) do
-			if type(k) == "string" and strmatch(k, "^player%d+$") and type(playerFrame) == "table" and playerFrame.id and playerFrame.Name then
-				local i = playerFrame.id
-				local _, class
-				if IsInRaid() then
-					_, class = UnitClass("raid"..i)
-				elseif i > 1 then
-					_, class = UnitClass("party"..i)
-				else
-					_, class = UnitClass("player")
-				end
+hooksecurefunc("MasterLooterFrame_UpdatePlayers", function()
+	-- TODO: Find a better way of doing this... Blizzard's way is frankly quite awful,
+	-- creating multiple new local tables every time the function runs. :(
+	for _, child in pairs(MasterLooterFrame) do
+		if type(child) == "table"
+			and child.id and child.Name
+			and child.GetObjectType
+			and child:GetObjectType() == "Button"
+		then
+			local i = child.id
+			local _, class
+			if IsInRaid() then
+				_, class = UnitClass("raid"..i)
+			elseif i > 1 then
+				_, class = UnitClass("party"..i)
+			else
+				_, class = UnitClass("player")
+			end
 
-				local color = class and CUSTOM_CLASS_COLORS[class]
-				if color then
-					playerFrame.Name:SetTextColor(color.r, color.g, color.b)
-				end
+			local color = class and CUSTOM_CLASS_COLORS[class]
+			if color then
+				child.Name:SetTextColor(color.r, color.g, color.b)
 			end
 		end
-	end)
-else
-	-- print(_, ": MasterLooterFrame_UpdatePlayers not found")
-end
+	end
+end)
 
 ------------------------------------------------------------------------
 -- FrameXML/LootHistory.lua
