@@ -72,7 +72,7 @@ end
 -- Blizzard_ChallengesUI/Blizzard_ChallengesUI.lua
 -- 7.3.0.25021
 -- 204, 218, 675
-
+-- Out of Date in Retail 
 addonFuncs["Blizzard_ChallengesUI"] = function()
 	local function ChallengesGuildBestMixin_SetUp(self, leaderInfo) -- 204
 		self.CharacterName:SetFormattedText(leaderInfo.isYou and CHALLENGE_MODE_GUILD_BEST_LINE_YOU or CHALLENGE_MODE_GUILD_BEST_LINE,
@@ -121,7 +121,7 @@ addonFuncs["Blizzard_ChallengesUI"] = function()
 end
 
 ------------------------------------------------------------------------
--- Blizzard_CollectionsUI/Blizzard_HeirloomCollection.lua
+-- Blizzard_Collections/Classic/Blizzard_HeirloomCollection.lua
 -- 7.3.0.25021
 -- 746
 
@@ -206,7 +206,7 @@ addonFuncs["Blizzard_Commentator"] = function()
 end
 
 ------------------------------------------------------------------------
--- Blizzard_Communities/CommunitiesMemberList.lua
+-- Blizzard_Communities
 -- https://github.com/Gethe/wow-ui-source/blame/87c526a3ae979a7f5244d635bd8ae952b4313bd8/Interface/AddOns/Blizzard_Communities/CommunitiesMemberList.lua#L937C3-L937C3
 
 addonFuncs["Blizzard_Communities"] = function()
@@ -225,9 +225,10 @@ addonFuncs["Blizzard_Communities"] = function()
 			end
 		end
 	end
+	-- CommunitiesMemberList.lua
 	hooksecurefunc(CommunitiesFrame.MemberList, "RefreshListDisplay", function(self)
 		local memberFrames = {}
-		if self.ListScrollFrame then -- classic
+		if self.ListScrollFrame then -- all classic flavors
 			memberFrames =  self.ListScrollFrame.buttons
 		elseif self.ScrollBox then  -- retail
 			memberFrames = self.ScrollBox:GetFrames()
@@ -600,8 +601,8 @@ end
 
 ------------------------------------------------------------------------
 -- FrameXML/LFDFrame.lua
--- 7.3.0.25021
--- 496
+-- 1.15.2.54067 | 491
+-- 4.4.0 | 491 (under `/Addons/Blizzard_GroupFinder/`)
 
 hooksecurefunc("LFDQueueFrameRandomCooldownFrame_Update", function()
 	for i = 1, GetNumSubgroupMembers() do
@@ -620,8 +621,7 @@ end)
 
 ------------------------------------------------------------------------
 -- FrameXML/LFGFrame.lua
--- 7.3.0.25021
--- 2070
+-- 4.4.0.54339 | 1966
 
 hooksecurefunc("LFGCooldownCover_Update", function(self)
 	local nextIndex, numPlayers, prefix = 1
@@ -746,7 +746,7 @@ if BossBanner_ConfigureLootFrame then
 else
 	-- print(_, ": BossBanner_ConfigureLootFrame not found")
 end
-
+-- Moved to BossBannerToast.lua
 
 ------------------------------------------------------------------------
 -- FrameXML/LootFrame.lua
@@ -949,7 +949,7 @@ end)
 -- 677, 701
 if ChatConfigChannelSettingsClassColorLegend
 	and ChatConfigChatSettingsClassColorLegend
-then -- only in Cata client
+then -- only in classic clients
 	local ClassColorLegend_OnShow = function(self)
 		if not self.classStrings then return end;
 		for key, classString in ipairs(self.classStrings) do
@@ -985,6 +985,15 @@ function CommunitiesUtil.GetMemberRBG(memberInfo)
 	else return BATTLENET_FONT_COLOR:GetRGB() end;
 end
 ------------------------------------------------------------------------
+-- Blizzard_CharacterFrame/Cata/PaperDollFrame.lua
+-- 4.4.0.54339 | 533
+-- Covered by FrameXML/PaperDollFrame.lua section
+
+------------------------------------------------------------------------
+-- Blizzard_ChatFrameBase/Classic/ChatFrame.lua
+-- 4.4.0.54339 | 3224, 3285 
+-- Covered by FrameXML/ChatFrame.lua section
+
 ------------------------------------------------------------------------
 -- GetClassColor Wrappers
 -- 10.2.6.53989 
