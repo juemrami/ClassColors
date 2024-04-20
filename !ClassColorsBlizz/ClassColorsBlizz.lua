@@ -151,46 +151,56 @@ addonFuncs["Blizzard_Collections"] = function()
 end
 
 ------------------------------------------------------------------------
--- Blizzard_Commentator/CommentatorCooldownDisplay.lua
+-- Blizzard_Commentator
+-- CommentatorCooldownDisplay.lua
 -- 7.3.0.25021
 -- 156
 -- Blizzard_Commentator/UnitFrame.lua
 -- 7.3.0.25021
 -- 208
+-- Blizzard_CommentatorNamePlate.lua
+-- 4.4.0.54339 | 214
 
 addonFuncs["Blizzard_Commentator"] = function()
-	local hookedCooldownFrames = {}
+	-- Blizzard Commentator is not accessible by players anymore, its a specate mode that can only be used by Blizzard usually for tournaments.
+		
+	-- CommentatorCooldownDisplayFrame no longer in any live client
+	if CommentatorCooldownDisplayFrame then
+		local hookedCooldownFrames = {}
 
-	local function setCooldownClass(self, class)
-		local color = class and CUSTOM_CLASS_COLORS[class]
-		if class then
-			self.Name:SetVertexColor(color.r, color.g, color.b, 1.0)
-		end
-	end
-
-	local function postAcquireCooldown(self)
-		for frame in next, self.activeObjects do
-			if not hookedCooldownFrames[frame] then
-				hooksecurefunc(frame, "SetClass", setCooldownClass)
-				hookedCooldownFrames[frame] = true
+		local function setCooldownClass(self, class)
+			local color = class and CUSTOM_CLASS_COLORS[class]
+			if class then
+				self.Name:SetVertexColor(color.r, color.g, color.b, 1.0)
 			end
 		end
-	end
 
-	hooksecurefunc(CommentatorCooldownDisplayFrame.TeamFrame1.playerRowPool, "Acquire", postAcquireCooldown)
-	hooksecurefunc(CommentatorCooldownDisplayFrame.TeamFrame2.playerRowPool, "Acquire", postAcquireCooldown)
-
-	local function setUnitFrameClass(self, class)
-		local color = class and CUSTOM_CLASS_COLORS[class]
-		if color then
-			self.HealthBar:SetStatusBarColor(color.r, color.g, color.b, 1)
+		local function postAcquireCooldown(self)
+			for frame in next, self.activeObjects do
+				if not hookedCooldownFrames[frame] then
+					hooksecurefunc(frame, "SetClass", setCooldownClass)
+					hookedCooldownFrames[frame] = true
+				end
+			end
 		end
+		hooksecurefunc(CommentatorCooldownDisplayFrame.TeamFrame1.playerRowPool, "Acquire", postAcquireCooldown)
+		hooksecurefunc(CommentatorCooldownDisplayFrame.TeamFrame2.playerRowPool, "Acquire", postAcquireCooldown)
 	end
 
-	-- PvPCommentatorMixin:OnLoad()
-	for teamIndex, frames in pairs(PvPCommentator.unitFrames) do
-		for playerIndex, frame in pairs(frames) do
-			hooksecurefunc(frame, "SetClass", setUnitFrameClass)
+	-- PvPCommentator no longer in any live client
+	if PvPCommentator then 
+		local function setUnitFrameClass(self, class)
+			local color = class and CUSTOM_CLASS_COLORS[class]
+			if color then
+				self.HealthBar:SetStatusBarColor(color.r, color.g, color.b, 1)
+			end
+		end
+
+		-- PvPCommentatorMixin:OnLoad()
+		for teamIndex, frames in pairs(PvPCommentator.unitFrames) do
+			for playerIndex, frame in pairs(frames) do
+				hooksecurefunc(frame, "SetClass", setUnitFrameClass)
+			end
 		end
 	end
 end
