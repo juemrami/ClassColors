@@ -236,6 +236,84 @@ addonFuncs["Blizzard_Communities"] = function()
 			ScrollElement_ColorPlayerName(frame)
 		end
 	end)
+	-- CommuntiesChatFrame.lua (retail/cata)
+	if CommunitiesFrame.Chat then
+		-- re-implement the called `GetPlayerCommunityLink`, check for color code, and check look up then swap.
+		function GetPlayerCommunityLink(playerName, linkDisplayText, clubId, streamId, epoch, position)
+			local oldColorStr, text = linkDisplayText:match("\124c(%x%x%x%x%x%x%x%x)(.+)\124r")
+			if oldColorStr and text then
+				local classFile = blizzHexColors[oldColorStr]
+				local newColor = classFile and CUSTOM_CLASS_COLORS[classFile]
+				if newColor then
+					linkDisplayText = WrapTextInColorCode(text, newColor.colorStr)
+				end
+			end
+			-- SanitizeCommunityData
+			if type(clubId) == "number" then
+				clubId = ("%.f"):format(clubId);
+			end
+			if type(streamId) == "number" then
+				streamId = ("%.f"):format(streamId);
+			end
+			epoch = ("%.f"):format(epoch);
+			position = ("%.f"):format(position);
+
+			return LinkUtil.FormatLink("playerCommunity", linkDisplayText, playerName, clubId, streamId, epoch, position);
+		end
+	end
+	--CommunitiesInvitationFrame.lua (retail/cata)
+	if CommunitiesFrame.InvitationFrame then
+		hooksecurefunc(CommunitiesFrame.InvitationFrame, "DisplayInvitation", 
+			function(self, invitationInfo)
+				if not (invitationInfo 
+					and invitationInfo.club.clubType == Enum.ClubType.Character)
+				then return end;
+
+				local inviter = invitationInfo.inviter
+				local classID = inviter and inviter.classID
+				local classInfo = classID and C_CreatureInfo.GetClassInfo(classID)
+				if classInfo then
+					local color = CUSTOM_CLASS_COLORS[classInfo.classFile]
+					local name = inviter.name or ""
+					if color then
+						local linkText = GetPlayerLink(
+							name,
+							("[%s]"):format(WrapTextInColorCode(name, color.colorStr))
+						);
+
+						self.InvitationText:SetText(COMMUNITY_INVITATION_FRAME_INVITATION_TEXT:format(linkText));
+					end
+				end
+			end
+		);
+	end
+	-- To color the Tooltip on Community/Guild Cards in the club finder.
+	-- ClubFinderGuildCardMixin_OnEnter -> CommunitiesUtil.AddLookingForLines -> CommunitiesUtil.GetRoleSpecClassLine;
+	-- ClubFinderApplicantEntryMixin:OnEnter -> GetRoleSpecClassLine
+	if CommunitiesUtil.GetRoleSpecClassLine then -- (retail only)
+		function CommunitiesUtil.GetRoleSpecClassLine(classID, specID)
+			local classInfo = C_CreatureInfo.GetClassInfo(classID);
+			local color = CUSTOM_CLASS_COLORS[classInfo.classFile];
+			
+			local _, specName, _, _, role = GetSpecializationInfoForSpecID(specID);
+			local texture;
+			if (role == "TANK") then
+				texture = CreateAtlasMarkup("roleicon-tiny-tank");
+			elseif (role == "DAMAGER") then
+				texture = CreateAtlasMarkup("roleicon-tiny-dps");
+			elseif (role == "HEALER") then
+				texture = CreateAtlasMarkup("roleicon-tiny-healer");
+			end
+		
+			return color:WrapTextInColorCode(CLUB_FINDER_LOOKING_FOR_CLASS_SPEC_WITH_ROLE:format(texture, specName, classInfo.className));
+		end
+	end
+	-- todo: 
+	-- CommunitiesTicketManagerDialog.InviteManager.ScrollBox elements
+	-- CommunitiesFrame.ApplicantList.ScrollBox elements
+
+
+	
 end
 ------------------------------------------------------------------------
 -- Blizzard_GuildUI/Blizzard_GuildRoster.lua
