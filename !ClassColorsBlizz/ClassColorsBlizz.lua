@@ -155,7 +155,7 @@ end
 -- CommentatorCooldownDisplay.lua
 -- 7.3.0.25021
 -- 156
--- Blizzard_Commentator/UnitFrame.lua
+-- Blizzard_Commentator/UnitFrame.lua (moved to Blizzard_CommentatorUnitFrame)
 -- 7.3.0.25021
 -- 208
 -- Blizzard_CommentatorNamePlate.lua
@@ -975,8 +975,8 @@ end
 
 ------------------------------------------------------------------------
 -- GetClassColor Wrappers
--- 10.2.6.53989 
--- RosterButton.lua @ 265
+-- RosterButton.lua 
+-- 10.2.6.53989 @ 265 | 1.15.2.54262 @ 265
 local function RosterButtons_SetNameColor(buttons)
 	for _, button in ipairs(buttons) do
 		if button.playerLocation then
@@ -997,8 +997,8 @@ elseif ChannelFrame.ChannelRoster.ScrollFrame then
 	hooksecurefunc(ChannelFrame.ChannelRoster, "Update", function(self)
 		RosterButtons_SetNameColor(self.ScrollFrame.buttons)
 	end)
-	-- note the lowercase `update` method
 	-- The ScrollFrame update is only called when actually scrolled.
+	-- note the lowercase `update` method
 	hooksecurefunc(ChannelFrame.ChannelRoster.ScrollFrame, "update", function(self)
 		RosterButtons_SetNameColor(self.buttons)
 	end)
@@ -1061,8 +1061,18 @@ end
 -- in function UnitPopupManager:AddDropDownTitle()
 
 ------------------------------------------------------------------------
--- PlayerUtil.GetClassColor Wrapper
--- Calls C_ClassColor.GetClassColor
+-- GetClassColorObj Wrappers
+-- Blizzard_ProfessionsGuildMemberList.lua 
+-- 10.2.6.53989 @ 7
+
+-- VignetteDataProvider.lua
+-- 1.15.2.54262 @ 252 | 4.4.0.54339 @ 252 |  10.2.6.53989 @ 408
+-- in function VignettePinMixin:DisplayPvpBountyTooltip 
+------------------------------------------------------------------------
+-- PlayerUtil.GetClassColor
+
+-- Blizzard_ClassTalentsTab.lua
+-- 10.2.6.53989 @ 511
 ------------------------------------------------------------------------
 
 
