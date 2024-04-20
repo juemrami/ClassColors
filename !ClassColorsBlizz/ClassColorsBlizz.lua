@@ -922,27 +922,6 @@ do
 		return AddMessage(frame, message, ...)
 	end
 end
-
-------------------------------------------------------------------------
--- FrameXML/StaticPopup.lua (via GetClassColor)
--- 7.3.0.25021
--- 1600
--- 7.2.0.23911
--- 1600
-hooksecurefunc("StaticPopup_OnUpdate", function(self, elapsed)
-	if self.which ~= "GROUP_INVITE_CONFIRMATION" or self.timeLeft <= 0 then return end
-
-	if not self.linkRegion or not self.nextUpdateTime then return end
-	if self.nextUpdateTime > GetTime() then return end
-
-	local _, _, guid = GetInviteConfirmationInfo(self.data)
-	local _, class, _, _, _, name = GetPlayerInfoByGUID(guid)
-	local color = class and CUSTOM_CLASS_COLORS[class]
-	if color then
-		GameTooltipTextLeft1:SetFormattedText("|c%s%s|r", color.colorStr, name)
-	end
-end)
-
 ------------------------------------------------------------------------
 -- FrameXML/ChatConfigFrame.xml
 -- 4.4.0.54339
@@ -1025,30 +1004,62 @@ elseif ChannelFrame.ChannelRoster.ScrollFrame then
 	end)
 
 end 
--- Blizzard_ClassTalentsTab.lua @ 511
--- Blizzard_CommentatorUnitFrame.lua @ 283 (not used)
--- ClubFinder.lua @ 688
--- ClubFinderApplicantList.lua @ 80
--- CommunitiesUtil.lua @ 320
--- ItemRef.lua @ 607, 672
--- StaticPopup.lua @ 1567
--- UnitPositionFrameTemplates.lua @ 231
--- UnitPopupShared.lua @ 134
--- local _G_GetClassColor = GetClassColor
--- function GetClassColor(classFile)
--- 	if InCombatLockdown() then
--- 		return _G_GetClassColor(classFile)
--- 	end
--- 	local color = CUSTOM_CLASS_COLORS[classFile];
--- 	if color then
--- 		return color.r, color.g, color.b, color.colorStr;
--- 	end
--- 	return 1, 1, 1, "ffffffff";
--- end
 
--- GetClassColorObj Wrapper
--- Blizzard_ProfessionsGuildMemberList.lua @ 7
--- VignetteDataProvider.lua @ 408
+-- Blizzard_CommentatorUnitFrame.lua @ 283 (not used)
+
+-- ClubFinder.lua
+-- 4.4.0.54339 @ 688 | 10.2.6.53989 @ 688
+
+-- ClubFinderApplicantList.lua
+-- 4.4.0.54339 @ 80 | 10.2.6.53989 @ 80
+
+-- CommunitiesUtil.lua
+-- 4.4.0.54339 @ 320 | 10.2.6.53989 @ 320
+
+-- ItemRef.lua 
+-- 10.2.6.53989 @ 607, 672
+
+-- StaticPopup.lua @ 1567, 3043
+-- GROUP_INVITE_CONFIRMATION | DUEL_TO_THE_DEATH_REQUESTED
+hooksecurefunc(StaticPopupDialogs.GROUP_INVITE_CONFIRMATION, "OnHyperlinkEnter",
+	function(self)
+		if not self.data then return end
+		local _, _, guid, roles, _, level = GetInviteConfirmationInfo(self.data);
+		local _, classFile, _, _, _, name, _ = GetPlayerInfoByGUID(guid or "");
+		local color = classFile and CUSTOM_CLASS_COLORS[classFile];
+		if name and color then			
+			GameTooltipTextLeft1:SetText(WrapTextInColorCode(name, color.colorStr));
+		end
+	end
+);
+if StaticPopupDialogs.DUEL_TO_THE_DEATH_REQUESTED then
+	-- only in classic clients
+	hooksecurefunc(StaticPopupDialogs.DUEL_TO_THE_DEATH_REQUESTED, "OnHyperlinkEnter",
+		function(self)
+			local guid, level = GetDuelerInfo();
+			local _, classFile, _, _, _, name, _ = GetPlayerInfoByGUID(guid or "");
+			local color = classFile and CUSTOM_CLASS_COLORS[classFile];
+			if name and color then			
+				GameTooltipTextLeft1:SetText(WrapTextInColorCode(name, color.colorStr));
+			end
+		end
+	);
+end
+
+
+-- UnitPositionFrameTemplates.lua
+-- 1.15.2.54262 @ 225 |4.4.0.54339 @ 235 | 10.2.6.53989 @ 231
+-- in function UnitPositionFrameMixin:GetUnitColor
+-- used by UnitPositionFrameTemplate inheriting frames
+-- such as any GroupMembersPinTemplate and any inheriting frames
+-- see GroupMembersDataProviderMixin
+-- This affect class colors in: Blizzard_WorldMap.lua, Blizzard_BattlefieldMap.lua
+
+-- UnitPopupShared.lua
+-- 1.15.2.54262 @ 134 | 4.4.0.54339 @ 134 | 10.2.6.53989 @ 134
+-- This one is the most likely to taint.
+-- in function UnitPopupManager:AddDropDownTitle()
+
 ------------------------------------------------------------------------
 -- PlayerUtil.GetClassColor Wrapper
 -- Calls C_ClassColor.GetClassColor
