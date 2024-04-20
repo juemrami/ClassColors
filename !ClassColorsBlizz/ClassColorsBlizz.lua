@@ -587,6 +587,7 @@ if WhoList_InitButton then -- retail method
 	end)
 else -- classic clients
 	hooksecurefunc("WhoList_Update", function() -- 661
+		if not WhoListScrollFrame:IsVisible() then return end
 		local offset = FauxScrollFrame_GetOffset(WhoListScrollFrame)
 		for i = 1, WHOS_TO_DISPLAY do
 			local info = C_FriendList.GetWhoInfo(i + offset)
