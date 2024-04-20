@@ -894,6 +894,19 @@ then -- only in Cata client
 	);
 end 
 ------------------------------------------------------------------------
+--FrameXML/CommunitiesUtil.lua
+-- 1.15.2 | 4
+-- 4.4.0.54339 | 4
+function CommunitiesUtil.GetMemberRBG(memberInfo)
+	if memberInfo.classID then
+		local info = C_CreatureInfo.GetClassInfo(memberInfo.classID);
+		if info then
+			local color = CUSTOM_CLASS_COLORS[info.classFile];
+			return color.r, color.g, color.b;
+		end
+	else return BATTLENET_FONT_COLOR:GetRGB() end;
+end
+------------------------------------------------------------------------
 
 local numAddons = 0
 
