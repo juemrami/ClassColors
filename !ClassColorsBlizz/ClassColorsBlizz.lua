@@ -985,6 +985,66 @@ function CommunitiesUtil.GetMemberRBG(memberInfo)
 	else return BATTLENET_FONT_COLOR:GetRGB() end;
 end
 ------------------------------------------------------------------------
+------------------------------------------------------------------------
+-- GetClassColor Wrappers
+-- 10.2.6.53989 
+-- RosterButton.lua @ 265
+local function RosterButtons_SetNameColor(buttons)
+	for _, button in ipairs(buttons) do
+		if button.playerLocation then
+			local _, class = C_PlayerInfo.GetClass(button.playerLocation)
+			local color = class and CUSTOM_CLASS_COLORS[class]
+			if color then
+				button.Name:SetTextColor(color.r, color.g, color.b)
+			end
+		end
+	end
+end
+if ChannelFrame.ChannelRoster.ScrollBox then
+	hooksecurefunc(ChannelFrame.ChannelRoster.ScrollBox, "Update", function(self)
+		RosterButtons_SetNameColor(self:GetFrames())
+	end)
+elseif ChannelFrame.ChannelRoster.ScrollFrame then
+	-- The ChannelRoster Update is only called when swapping between channels
+	hooksecurefunc(ChannelFrame.ChannelRoster, "Update", function(self)
+		RosterButtons_SetNameColor(self.ScrollFrame.buttons)
+	end)
+	-- note the lowercase `update` method
+	-- The ScrollFrame update is only called when actually scrolled.
+	hooksecurefunc(ChannelFrame.ChannelRoster.ScrollFrame, "update", function(self)
+		RosterButtons_SetNameColor(self.buttons)
+	end)
+
+end 
+-- Blizzard_ClassTalentsTab.lua @ 511
+-- Blizzard_CommentatorUnitFrame.lua @ 283 (not used)
+-- ClubFinder.lua @ 688
+-- ClubFinderApplicantList.lua @ 80
+-- CommunitiesUtil.lua @ 320
+-- ItemRef.lua @ 607, 672
+-- StaticPopup.lua @ 1567
+-- UnitPositionFrameTemplates.lua @ 231
+-- UnitPopupShared.lua @ 134
+-- local _G_GetClassColor = GetClassColor
+-- function GetClassColor(classFile)
+-- 	if InCombatLockdown() then
+-- 		return _G_GetClassColor(classFile)
+-- 	end
+-- 	local color = CUSTOM_CLASS_COLORS[classFile];
+-- 	if color then
+-- 		return color.r, color.g, color.b, color.colorStr;
+-- 	end
+-- 	return 1, 1, 1, "ffffffff";
+-- end
+
+-- GetClassColorObj Wrapper
+-- Blizzard_ProfessionsGuildMemberList.lua @ 7
+-- VignetteDataProvider.lua @ 408
+------------------------------------------------------------------------
+-- PlayerUtil.GetClassColor Wrapper
+-- Calls C_ClassColor.GetClassColor
+------------------------------------------------------------------------
+
 
 local numAddons = 0
 
