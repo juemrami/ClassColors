@@ -338,6 +338,8 @@ end
 
 addonFuncs["Blizzard_InspectUI"] = function()
 	hooksecurefunc("InspectPaperDollFrame_SetLevel", function() -- 34
+		-- classic era doesnt set spec text
+		if isClassicEra then return end 
 		local unit = InspectFrame.unit
 		if not unit then return end
 
@@ -1124,7 +1126,7 @@ end
 
 -- VignetteDataProvider.lua
 -- 1.15.2.54262 @ 252 | 4.4.0.54339 @ 252 |  10.2.6.53989 @ 408
--- in function VignettePinMixin:DisplayPvpBountyTooltip 
+-- in function VignettePinMixin:DisplayPvpBountyTooltip (not used by classic clients)
 ------------------------------------------------------------------------
 -- PlayerUtil.GetClassColor
 
