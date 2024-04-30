@@ -13,6 +13,7 @@ local _, ns = ...
 local strfind, format, gsub, strmatch, strsub = string.find, string.format, string.gsub, string.match, string.sub
 local pairs, type = pairs, type
 
+local isClassicEra = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 ------------------------------------------------------------------------
 
 local addonFuncs = {}
@@ -1055,7 +1056,62 @@ end
 -- such as any GroupMembersPinTemplate and any inheriting frames
 -- see GroupMembersDataProviderMixin
 -- This affect class colors in: Blizzard_WorldMap.lua, Blizzard_BattlefieldMap.lua
+local appearance = {
+	size = 20,
+	---@type "WhiteCircle-RaidBlips"|"WhiteDotCircle-RaidBlips"|"PlayerPartyBlip"|
+	texture = "PlayerPartyBlip",
+	sublevel = 7,
+	shouldShow = true,
+	useClassColor = true,
+}
+local function getUnitColor(timeNow, unit, _) 
+	if UnitIsUnit(unit, "player") then
+		return true, 1, 1, 1;
+	end	
+	if appearance.shouldShow then
+		local r, g, b  = 1, 1, 1;
+		if appearance.useCommentatorColor and C_Commentator.IsSpectating() then
+			local color = C_Commentator.GetTeamColorByUnit(unit);
+			if (color) then
+				r, g, b = color.r, color.g, color.b;
+			end
+		elseif appearance.useClassColor then
+			local class = select(2, UnitClass(unit));
+			local color = class and CUSTOM_CLASS_COLORS[class];
+			r, g, b = color.r, color.g, color.b;
+		end
 
+		return true, CheckColorOverrideForPVPInactive(unit, timeNow, r, g, b);
+	end
+
+	return false;
+end
+local dataProvierTempate = "GroupMembersPinTemplate"
+local providers = {}
+local pinProvider = WorldMapFrame.pinPools and WorldMapFrame.pinPools[dataProvierTempate]
+if pinProvider then tinsert(providers, pinProvider) end
+pinProvider = BattlefieldMapFrame and BattlefieldMapFrame.pinPools and BattlefieldMapFrame.pinPools[dataProvierTempate]
+if pinProvider then tinsert(providers, pinProvider) end
+
+for _, pinProvider in ipairs(providers) do
+	for pin in pinProvider:EnumerateActive() do
+		if pin then
+			if isClassicEra then -- era uses the older textures that cant be class colored			
+				pin:SetPinTexture("party", appearance.texture)
+				pin:SetAppearanceField("party", "useClassColor", true)
+				pin:SetPinTexture("raid", appearance.texture)
+				pin:SetAppearanceField("raid", "useClassColor", true)
+				-- spetateda
+				-- spectatedb
+			end
+			if pin.GetUnitColor then
+				function pin:GetUnitColor(...)
+					return getUnitColor(...)
+				end
+			end
+		end
+	end
+end
 -- UnitPopupShared.lua
 -- 1.15.2.54262 @ 134 | 4.4.0.54339 @ 134 | 10.2.6.53989 @ 134
 -- This one is the most likely to taint.
