@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 100207, 40400, 11502
 ## Version: @project-version@
 
 ## Title: Class Colors
