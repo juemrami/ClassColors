@@ -19,7 +19,7 @@ end
 ------------------------------------------------------------------------
 
 local L = ns.L 
-L.TITLE = GetAddOnMetadata("!ClassColors", "Title")
+L.TITLE = C_AddOns.GetAddOnMetadata("!ClassColors", "Title")
 
 ------------------------------------------------------------------------
 

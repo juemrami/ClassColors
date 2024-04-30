@@ -11,10 +11,17 @@ local ADDON, ns = ...
 local L = {}
 ns.L = L
 
-L.TITLE = GetAddOnMetadata(ADDON, "Title")
-L.NOTES = GetAddOnMetadata(ADDON, "Notes")
+L.TITLE = C_AddOns.GetAddOnMetadata(ADDON, "Title")
+L.NOTES = C_AddOns.GetAddOnMetadata(ADDON, "Notes")
 
-FillLocalizedClassList(L, false)
+if FillLocalizedClassList then
+	FillLocalizedClassList(L, false)
+else -- retail API
+	local classList = LocalizedClassList(false)
+	for classID, className in pairs(classList) do
+		L[classID] = className
+	end
+end
 
 setmetatable(L, { __index = function(t, k)
 	local v = tostring(k)
