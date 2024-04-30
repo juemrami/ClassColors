@@ -75,6 +75,9 @@ for _, class in ipairs(CLASS_SORT_ORDER) do
 end
 sort(classes)
 
+-- copy to avoid modifying the original table (better safe than sorry)
+local RAID_CLASS_COLORS = CopyTable(RAID_CLASS_COLORS) 
+
 local classTokens = {}
 for token, class in pairs(LOCALIZED_CLASS_NAMES_MALE) do
 	classTokens[class] = token
